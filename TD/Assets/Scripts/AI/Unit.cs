@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Unit : MonoBehaviour {
 
-	public string name;
+	public string unitName;
 	public int health;
 	public int damage;
 	public float attackRange;
@@ -14,9 +14,14 @@ public class Unit : MonoBehaviour {
 	private Unit target;
 	private int currentHealth;
 	private float nextAttack = 0;
+	protected CustomArrayList<Unit> targets = new CustomArrayList<Unit>();
 	
 	public void Start() {
 		this.currentHealth = this.health;
+		
+		SphereCollider collider = gameObject.GetComponent<SphereCollider>();
+		collider.radius = aggroRange;
+		
 		this.OnStart();
 	}
 	
@@ -26,18 +31,41 @@ public class Unit : MonoBehaviour {
 		
 		this.OnUpdate();
 		
-		if(this.target == null) return;
+		if(this.target == null || !this.targets.Contains(target)) {
+			this.FindTarget();
+			return;
+		}
+		
+		transform.LookAt(this.target.transform.position);
 		
 		if(Vector3.Distance(transform.position, target.transform.position) < attackRange) {
 			if(nextAttack < Time.time) {
 				Attack(this.target);
 			}
 		} else {
-			
+			transform.position = Vector3.Lerp(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
 		}
 	}
 	
 	public virtual void OnUpdate() {}
+	
+	private void FindTarget() {
+		Unit closest = null;
+		float distance = 0;
+		
+		foreach(Unit target in this.targets) {
+			if(closest == null){
+				closest = target;
+				distance = Vector3.Distance(transform.position, closest.transform.position);
+			}
+			else if(Vector3.Distance(transform.position, target.transform.position) < distance) {
+				closest = target;
+				distance = Vector3.Distance(transform.position, closest.transform.position);
+			}
+		}
+		
+		this.target = closest;
+	}
 	
 	public void Damage(Unit attacker, int damage) {
 		this.currentHealth -= damage;
