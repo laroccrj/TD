@@ -2,9 +2,12 @@ using UnityEngine;
 using System.Collections;
 
 public class Unit : MonoBehaviour {
-
+	
+	public static CustomArrayList<Unit> towers = new CustomArrayList<Unit>();
+	public static CustomArrayList<Unit> attackers = new CustomArrayList<Unit>();
+	
 	public string unitName;
-	public int health;
+	public int maxHealth;
 	public int damage;
 	public float attackRange;
 	public float aggroRange;
@@ -13,26 +16,17 @@ public class Unit : MonoBehaviour {
 	
 	private bool alive = true;
 	protected Unit target;
-	private int currentHealth;
+	public int currentHealth;
 	private float nextAttack = 0;
 	protected CustomArrayList<Unit> targets = new CustomArrayList<Unit>();
 	
-	public void Start() {
-		this.currentHealth = this.health;
-		
-		SphereCollider collider = gameObject.GetComponent<SphereCollider>();
-		collider.radius = aggroRange;
-		
-		this.OnStart();
+	public virtual void Start() {
+		this.currentHealth = this.maxHealth;
 	}
 	
-	public virtual void OnStart() {}
 	
-	public void Update() {
-		
+	public virtual void Update() {
 		if(!alive) return;
-		
-		this.OnUpdate();
 		
 		if(this.target == null || !this.targets.Contains(target)) {
 			this.FindTarget();
@@ -46,14 +40,12 @@ public class Unit : MonoBehaviour {
 					Attack(this.target);
 				}
 			} else {
-				transform.position = Vector3.Lerp(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
+				transform.Translate(transform.InverseTransformDirection(Vector3.Normalize(target.transform.position - transform.position) * moveSpeed * Time.deltaTime));
 			}
 		}
 	}
 	
-	public virtual void OnUpdate() {}
-	
-	private void FindTarget() {
+	protected virtual void FindTarget() {
 		Unit closest = null;
 		float distance = 0;
 		

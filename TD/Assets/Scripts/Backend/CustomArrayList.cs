@@ -99,4 +99,8 @@ public class CustomArrayList<T> : object   {
 	public int Get_Size() {
 		return this.size;	
 	}
+	
+	public void Clear() {
+		this.size = 0;	
+	}
 }

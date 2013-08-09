@@ -6,16 +6,22 @@ public class Attacker : Unit {
 	
 	private WaypointTracker[] trackers;
 	
-	public override void OnStart() {
-		
+	public override void Start (){
 		this.trackers = new WaypointTracker[this.waypoints.Length];
 		
 		for(int i = 0; i < this.waypoints.Length; i++){
 			this.trackers[i] = new WaypointTracker(this.waypoints[i]);	
 		}
+		
+		Unit.attackers.Add(this);
+		
+		base.Start();
 	}
 	
-	public override void OnUpdate() {
+	public override void Update() {
+		
+		base.Update();
+		
 		if(this.target == null) {
 			foreach(WaypointTracker tracker in this.trackers){
 				if(!tracker.reached) {
@@ -38,5 +44,21 @@ public class Attacker : Unit {
 				}
 			}
 		}
+	}
+	
+	public override void Death (){
+		Unit.attackers.Remove(this);
+		Destroy(gameObject);		
+	}
+	
+	protected override void FindTarget ()
+	{
+		this.targets.Clear();
+		
+		foreach(Unit target in Unit.towers)
+			if(Vector3.Distance(transform.position, target.transform.position) <= this.aggroRange)
+				this.targets.Add(target);
+		
+		base.FindTarget ();
 	}
 }

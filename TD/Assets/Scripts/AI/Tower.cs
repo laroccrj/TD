@@ -3,15 +3,20 @@ using System.Collections;
 
 public class Tower : Unit {
 
-	void OnTriggerEnter(Collider collider) {
-		if(collider.gameObject.GetComponent<Attacker>()){
-			this.targets.Add(collider.gameObject.GetComponent<Unit>());
-		}
+	public override void Start ()
+	{
+		Unit.towers.Add(this);
+		base.Start ();
 	}
 	
-	void OnTriggerExit(Collider collider) {
-		if(collider.gameObject.GetComponent<Attacker>()){
-			this.targets.Remove(collider.gameObject.GetComponent<Unit>());
-		}
+	protected override void FindTarget ()
+	{
+		this.targets.Clear();
+		
+		foreach(Unit target in Unit.attackers)
+			if(Vector3.Distance(transform.position, target.transform.position) <= this.aggroRange)
+				this.targets.Add(target);
+		
+		base.FindTarget ();
 	}
 }
