@@ -11,7 +11,8 @@ public class Unit : MonoBehaviour {
 	public float attackSpeed;
 	public float moveSpeed;
 	
-	private Unit target;
+	private bool alive = true;
+	protected Unit target;
 	private int currentHealth;
 	private float nextAttack = 0;
 	protected CustomArrayList<Unit> targets = new CustomArrayList<Unit>();
@@ -29,21 +30,24 @@ public class Unit : MonoBehaviour {
 	
 	public void Update() {
 		
+		if(!alive) return;
+		
 		this.OnUpdate();
 		
 		if(this.target == null || !this.targets.Contains(target)) {
 			this.FindTarget();
-			return;
 		}
 		
-		transform.LookAt(this.target.transform.position);
-		
-		if(Vector3.Distance(transform.position, target.transform.position) < attackRange) {
-			if(nextAttack < Time.time) {
-				Attack(this.target);
+		if(this.target != null) {
+			transform.LookAt(this.target.transform.position);
+			
+			if(Vector3.Distance(transform.position, target.transform.position) < attackRange) {
+				if(nextAttack < Time.time) {
+					Attack(this.target);
+				}
+			} else {
+				transform.position = Vector3.Lerp(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
 			}
-		} else {
-			transform.position = Vector3.Lerp(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
 		}
 	}
 	
